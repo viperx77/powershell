@@ -76,11 +76,10 @@ $movieExtrasFolder = "F:\Carl\movie-extras"
 # Should the makemkv output files nto be deleted
 $keepMakeMkvOutput = $false
 
-#$brFiles =  Get-ChildItem $sourceRoot -Recurse -Filter 'index.bdmv' | Where-Object { $_.DirectoryName -notmatch 'BACKUP' }
+$brFiles =  Get-ChildItem $sourceRoot -Recurse -Filter 'index.bdmv' | Where-Object { $_.DirectoryName -notmatch 'BACKUP' }
 $isoFiles = Get-ChildItem $sourceRoot -Recurse -Filter '*.iso'
-# $tsFiles = Get-ChildItem $sourceRoot -Recurse -Filter 'VIDEO_TS.IFO'
-# $allFiles = $brFiles + $isoFiles + $tsFiles
-$allFiles = $isoFiles
+ $tsFiles = Get-ChildItem $sourceRoot -Recurse -Filter 'VIDEO_TS.IFO'
+$allFiles = $brFiles + $isoFiles + $tsFiles
 
 $allFiles | ForEach-Object { 
   $filePath = $_.FullName
