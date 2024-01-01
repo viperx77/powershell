@@ -83,9 +83,8 @@ $allFiles = $brFiles + $isoFiles + $tsFiles
 
 $allFiles | ForEach-Object { 
   $filePath = $_.FullName
-  # Skip source folder that have an underscore as the first character of the folder name so
-  # they can be manually renamed  to be skipped. This allows the script to be srestarted in case of 
-  # bad files or the script hanging up.
+  # Skip source folder that have an underscore as the first character of the folder name
+  # to allow the script to be cancelled and it will pick up where it left off
   $pathParts = $filePath -split '\\' | Where-Object { $_ }
   $mkvsFolder = $pathParts[1]
   if (SkipSourceFolder $mkvsFolder) {
@@ -100,4 +99,6 @@ $allFiles | ForEach-Object {
     Write-Debug "delete converted source mkv folder '$($outputFolder)'"
     Remove-Item -Path $outputFolder -Recurse -Force 
   }
+  Write-Debug "rename '$($pathParts[0])\$($mkvsFolder)' to '$($pathParts[0])\_$($mkvsFolder)'"
+  Rename-Item -Path "$($pathParts[0])\$($mkvsFolder)" -NewName "$($pathParts[0])\_$($mkvsFolder)"
 }
