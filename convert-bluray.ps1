@@ -66,19 +66,22 @@ function SkipSourceFolder($folder) {
 }
 
 # This is the root location of the source rips
-$sourceRoot = "I:\"
+$sourceRoot = "H:\"
 # This is the root folder to create folder per rip containing all the mkvs (output from makemkv)
-$rootMkvFolder = "F:\Carl\mkv"
+$rootMkvFolder = "c:\temp\mkv"
 # This is the root folder to output all the main transcoded movie files
-$movieFolder = "F:\Carl\movies"
+$movieFolder = "I:\movies"
 # This is the root folder to create a folder per movie with all the extra transcoded files
-$movieExtrasFolder = "F:\Carl\movie-extras"
+$movieExtrasFolder = "I:\movie-extras"
 # Should the makemkv output files nto be deleted
 $keepMakeMkvOutput = $false
 
+# pause for this amount number of seconds  to ask if should cancel
+$timeoutSeconds = 5
+
 $brFiles =  Get-ChildItem $sourceRoot -Recurse -Filter 'index.bdmv' | Where-Object { $_.DirectoryName -notmatch 'BACKUP' }
 $isoFiles = Get-ChildItem $sourceRoot -Recurse -Filter '*.iso'
- $tsFiles = Get-ChildItem $sourceRoot -Recurse -Filter 'VIDEO_TS.IFO'
+$tsFiles = Get-ChildItem $sourceRoot -Recurse -Filter 'VIDEO_TS.IFO'
 $allFiles = $brFiles + $isoFiles + $tsFiles
 
 $allFiles | ForEach-Object { 
@@ -101,4 +104,25 @@ $allFiles | ForEach-Object {
   }
   Write-Debug "rename '$($pathParts[0])\$($mkvsFolder)' to '$($pathParts[0])\_$($mkvsFolder)'"
   Rename-Item -Path "$($pathParts[0])\$($mkvsFolder)" -NewName "$($pathParts[0])\_$($mkvsFolder)"
+
+  if ($timeoutSeconds -gt 0) {
+    Write-Host "Stop processing?"
+    $scriptBlock = {
+        $response = Read-Host "Stop processing?"
+        return $response
+    }
+    $job = Start-Job -ScriptBlock $scriptBlock
+    Start-Sleep -Seconds $timeoutSeconds
+    if (Get-Job -Id $job.Id -ErrorAction SilentlyContinue) {
+        Write-Debug "Timed out, continuing..."
+        Stop-Job -Id $job.Id
+        Remove-Job -Id $job.Id
+    } else {
+        $result = Receive-Job -Id $job.Id
+        Remove-Job -Id $job.Id
+        if ($result -eq "Y" -or $result -eq "y") {
+            exit
+        }      
+    }  
+  }
 }
