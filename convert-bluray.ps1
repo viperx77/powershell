@@ -22,8 +22,7 @@ function MakeMkv($sourceFile, $outputFolder) {
 
   $titleNums = GetTitlesToConvert $sourceFile
   $titleNums | % {
-    $cmd = "echo yes | ""$($may
-    kemkv)"" -r  mkv ""$($sourceFile)"" $_ ""$($outputFolder)"""
+    $cmd = "echo yes | ""$($makemkv)"" -r  mkv ""$($sourceFile)"" $_ ""$($outputFolder)"""
     Write-Debug $cmd
     & cmd.exe /c $cmd
   }  
